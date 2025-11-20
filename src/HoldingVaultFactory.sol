@@ -9,6 +9,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 
 contract HoldingVaultFactory is Ownable {
     address private immutable i_implementation;
+    mapping(address => address) private s_creatorOfVault;
 
     constructor() Ownable(msg.sender) {
         i_implementation = address(new HoldingVault(address(this)));
@@ -36,6 +37,7 @@ contract HoldingVaultFactory is Ownable {
         clonedHoldingVault = Clones.clone(i_implementation);
         IHoldingVault(clonedHoldingVault)
             .init(creator, IERC20(offerToken), IERC20(requestToken), offerAmount, requestAmount);
+        s_creatorOfVault[clonedHoldingVault] = creator;
     }
 
     /// @notice Calls the vault to complete the swap on behalf of the acceptor
@@ -52,7 +54,7 @@ contract HoldingVaultFactory is Ownable {
                             GETTER FUNCTIONS
     //////////////////////////////////////////////////////////////*/
     function getCreatorOfVault(address vault) external view returns (address) {
-        return IHoldingVault(vault).getCreator();
+        return s_creatorOfVault[vault];
     }
 
     function getImplementation() external view returns (address) {
