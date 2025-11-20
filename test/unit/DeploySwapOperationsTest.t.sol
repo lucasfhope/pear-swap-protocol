@@ -23,11 +23,11 @@ contract DeploySwapOperationsTest is Test {
 
     function setUp() external {
         deployer = new DeploySwapOperations();
-        (address _swapOperations, ) = deployer.run(owner);
+        (address _swapOperations,) = deployer.run(owner);
         swapOperations = ISwapOperations(_swapOperations);
         holdingVaultFactory = IHoldingVaultFactory(swapOperations.getHoldingVaultFactory());
         holdingVaultImplementation = IHoldingVault(holdingVaultFactory.getImplementation());
-        swapOperationsOwner = IOwnableMinimal(_swapOperations); 
+        swapOperationsOwner = IOwnableMinimal(_swapOperations);
         holdingVaultFactoryOwner = IOwnableMinimal(address(holdingVaultFactory));
     }
 

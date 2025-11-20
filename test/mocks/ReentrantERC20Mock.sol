@@ -5,10 +5,10 @@ import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 /// @notice Test-only ERC20 that reenters during transferFrom
 contract ReentrantERC20 is ERC20 {
-    address public reentryTarget; 
-    bytes4  public reentrySelector;
-    bool    public reentryEnabled;
-    bool    internal entered;
+    address public reentryTarget;
+    bytes4 public reentrySelector;
+    bool public reentryEnabled;
+    bool internal entered;
 
     event ReentrancyAttempt(bool success, bytes data);
     constructor() ERC20("Reentrant20", "RE20") {}
@@ -18,9 +18,9 @@ contract ReentrantERC20 is ERC20 {
     }
 
     function configureReentry(address target, bytes4 selector, bool enabled) external {
-        reentryTarget   = target;
+        reentryTarget = target;
         reentrySelector = selector;
-        reentryEnabled  = enabled;
+        reentryEnabled = enabled;
     }
 
     // Inject reentrancy before the actual transfer accounting occurs.

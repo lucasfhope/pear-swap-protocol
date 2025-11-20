@@ -9,18 +9,14 @@ contract FeeOnTransferERC20Mock is ERC20 {
     uint256 constant BPS_DIVISOR = 10_000;
     address constant FEE_RECIPIENT = address(1001);
 
-    constructor( ) ERC20("Fee On Transfer Token", "FOT") {}
+    constructor() ERC20("Fee On Transfer Token", "FOT") {}
 
     function mint(address to, uint256 amount) external {
         _mint(to, amount);
     }
 
     /// @dev OpenZeppelin v5 uses `_update` instead of `_transfer`
-    function _update(
-        address from,
-        address to,
-        uint256 value
-    ) internal override {
+    function _update(address from, address to, uint256 value) internal override {
         if (from == address(0) || to == address(0)) {
             super._update(from, to, value);
             return;

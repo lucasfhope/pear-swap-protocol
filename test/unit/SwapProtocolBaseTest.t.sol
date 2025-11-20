@@ -46,7 +46,6 @@ contract SwapProtocolBaseTest is Test {
     uint256 daiOfferAmount = 10000e18;
     uint256 daiRequestAmount = 3100e18;
 
-
     function setUp() public virtual {
         DeploySwapOperations deployer = new DeploySwapOperations();
         (address _swapOperations, address _helperConfig) = deployer.deploySwapOperations(owner);
@@ -80,21 +79,18 @@ contract SwapProtocolBaseTest is Test {
         weth.approve(address(swapOperations), wethOfferAmount);
         vm.expectEmit(true, true, true, false);
         emit ISwapOperations.SwapOfferCreated(
-            steven,
-            address(weth),
-            address(usdc),
-            wethOfferAmount,
-            usdcRequestAmount,
-            address(0)
+            steven, address(weth), address(usdc), wethOfferAmount, usdcRequestAmount, address(0)
         );
-        IHoldingVault vault = IHoldingVault(swapOperations.createSwapOffer(
-            ISwapOperations.SwapOffer({
-                offerToken: address(weth),
-                requestToken: address(usdc),
-                offerAmount: wethOfferAmount,
-                requestAmount: usdcRequestAmount
-            })
-        ));
+        IHoldingVault vault = IHoldingVault(
+            swapOperations.createSwapOffer(
+                ISwapOperations.SwapOffer({
+                    offerToken: address(weth),
+                    requestToken: address(usdc),
+                    offerAmount: wethOfferAmount,
+                    requestAmount: usdcRequestAmount
+                })
+            )
+        );
         vm.stopPrank();
         assert(weth.balanceOf(address(vault)) == wethOfferAmount);
         assert(weth.balanceOf(steven) == wethMintAmount - wethOfferAmount);
@@ -106,29 +102,21 @@ contract SwapProtocolBaseTest is Test {
         fakeToken.mint(steven, amount);
         vm.startPrank(steven);
         fakeToken.approve(address(swapOperations), amount);
-        vm.expectRevert(abi.encodeWithSelector(
-            ISwapOperations.SwapOperations__TokenNotAllowed.selector,
-            address(fakeToken)
-        ));
-        swapOperations.createSwapOffer( 
+        vm.expectRevert(
+            abi.encodeWithSelector(ISwapOperations.SwapOperations__TokenNotAllowed.selector, address(fakeToken))
+        );
+        swapOperations.createSwapOffer(
             ISwapOperations.SwapOffer({
-                offerToken: address(fakeToken),
-                requestToken: address(usdc),
-                offerAmount: amount,
-                requestAmount: amount
+                offerToken: address(fakeToken), requestToken: address(usdc), offerAmount: amount, requestAmount: amount
             })
         );
         weth.approve(address(swapOperations), amount);
-        vm.expectRevert(abi.encodeWithSelector(
-            ISwapOperations.SwapOperations__TokenNotAllowed.selector,
-            address(fakeToken)
-        ));
-        swapOperations.createSwapOffer( 
+        vm.expectRevert(
+            abi.encodeWithSelector(ISwapOperations.SwapOperations__TokenNotAllowed.selector, address(fakeToken))
+        );
+        swapOperations.createSwapOffer(
             ISwapOperations.SwapOffer({
-                offerToken: address(weth),
-                requestToken: address(fakeToken),
-                offerAmount: amount,
-                requestAmount: amount
+                offerToken: address(weth), requestToken: address(fakeToken), offerAmount: amount, requestAmount: amount
             })
         );
         vm.stopPrank();
@@ -138,21 +126,15 @@ contract SwapProtocolBaseTest is Test {
         vm.startPrank(steven);
         weth.approve(address(swapOperations), wethOfferAmount);
         vm.expectRevert(ISwapOperations.SwapOperations__OfferAndRequestAmountsMustBeGreaterThanZero.selector);
-        swapOperations.createSwapOffer( 
+        swapOperations.createSwapOffer(
             ISwapOperations.SwapOffer({
-                offerToken: address(weth),
-                requestToken: address(usdc),
-                offerAmount: 0,
-                requestAmount: usdcRequestAmount
+                offerToken: address(weth), requestToken: address(usdc), offerAmount: 0, requestAmount: usdcRequestAmount
             })
         );
         vm.expectRevert(ISwapOperations.SwapOperations__OfferAndRequestAmountsMustBeGreaterThanZero.selector);
-        swapOperations.createSwapOffer( 
+        swapOperations.createSwapOffer(
             ISwapOperations.SwapOffer({
-                offerToken: address(weth),
-                requestToken: address(usdc),
-                offerAmount: wethOfferAmount,
-                requestAmount: 0
+                offerToken: address(weth), requestToken: address(usdc), offerAmount: wethOfferAmount, requestAmount: 0
             })
         );
         vm.stopPrank();
@@ -162,7 +144,7 @@ contract SwapProtocolBaseTest is Test {
         vm.startPrank(steven);
         weth.approve(address(swapOperations), wethOfferAmount);
         vm.expectRevert(ISwapOperations.SwapOperations__CantSwapSameToken.selector);
-        swapOperations.createSwapOffer( 
+        swapOperations.createSwapOffer(
             ISwapOperations.SwapOffer({
                 offerToken: address(weth),
                 requestToken: address(weth),
@@ -175,13 +157,7 @@ contract SwapProtocolBaseTest is Test {
 
     function testCanCancelSwapOffer() external {
         uint256 usdcBalanceBeforeSwapOffer = usdc.balanceOf(michael);
-        IHoldingVault vault = _makeSwapOffer(
-            michael,
-            address(usdc),
-            address(link),
-            usdcOfferAmount,
-            linkRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(michael, address(usdc), address(link), usdcOfferAmount, linkRequestAmount);
         uint256 usdcBalanceAfterSwapOffer = usdc.balanceOf(michael);
         assert(usdcBalanceAfterSwapOffer + usdcOfferAmount == usdcBalanceBeforeSwapOffer);
 
@@ -197,13 +173,7 @@ contract SwapProtocolBaseTest is Test {
     }
 
     function testRevertsWhenNonCreatorTriesToCancelSwapOffer() external {
-        IHoldingVault vault = _makeSwapOffer(
-            nick,
-            address(link),
-            address(dai),
-            linkOfferAmount,
-            daiRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(nick, address(link), address(dai), linkOfferAmount, daiRequestAmount);
         vm.startPrank(scott);
         vm.expectRevert(ISwapOperations.SwapOperations__NotCreatorOfSwapOffer.selector);
         swapOperations.cancelSwapOffer(address(vault));
@@ -216,13 +186,7 @@ contract SwapProtocolBaseTest is Test {
         uint256 michaelUsdcBalanceBeforeSwapOffer = usdc.balanceOf(michael);
         uint256 michaelDaiBalanceBeforeSwapOffer = dai.balanceOf(michael);
 
-        IHoldingVault vault = _makeSwapOffer(
-            scott,
-            address(dai),
-            address(usdc),
-            daiOfferAmount,
-            usdcRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(scott, address(dai), address(usdc), daiOfferAmount, usdcRequestAmount);
 
         vm.startPrank(michael);
         usdc.approve(address(swapOperations), wethRequestAmount);
@@ -237,7 +201,7 @@ contract SwapProtocolBaseTest is Test {
         assert(scottUsdcBalanceAfterSwapCompletion == scottUsdcBalanceBeforeSwapOffer + usdcRequestAmount);
         assert(scottDaiBalanceAfterSwapCompletion == scottDaiBalanceBeforeSwapOffer - daiOfferAmount);
         assert(michaelUsdcBalanceAfterSwapCompletion == michaelUsdcBalanceBeforeSwapOffer - usdcRequestAmount);
-        assert(michaelDaiBalanceAfterSwapCompletion ==  michaelDaiBalanceBeforeSwapOffer + daiOfferAmount);
+        assert(michaelDaiBalanceAfterSwapCompletion == michaelDaiBalanceBeforeSwapOffer + daiOfferAmount);
     }
 
     function testOwnerCanAllowAndDisallowTokens() external {
@@ -252,21 +216,12 @@ contract SwapProtocolBaseTest is Test {
 
     function testRevertsWhenNonOwnerTriesToUpdateAllowedTokens() external {
         vm.prank(nick);
-        vm.expectRevert(abi.encodeWithSelector(
-            Ownable.OwnableUnauthorizedAccount.selector,
-            nick
-        ));
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, nick));
         swapOperationsOwner.updateAllowedToken(address(link), false);
     }
-    
+
     function testDisallowingTokensDoesNotEffectExistingSwapOffers() external {
-        IHoldingVault vault = _makeSwapOffer(
-            steven,
-            address(weth),
-            address(usdc),
-            wethOfferAmount,
-            usdcRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(steven, address(weth), address(usdc), wethOfferAmount, usdcRequestAmount);
 
         vm.startPrank(owner);
         swapOperationsOwner.updateAllowedToken(address(weth), false);
@@ -275,10 +230,7 @@ contract SwapProtocolBaseTest is Test {
 
         vm.startPrank(michael);
         usdc.approve(address(swapOperations), usdcOfferAmount);
-        vm.expectRevert(abi.encodeWithSelector(
-            ISwapOperations.SwapOperations__TokenNotAllowed.selector,
-            address(usdc)
-        ));
+        vm.expectRevert(abi.encodeWithSelector(ISwapOperations.SwapOperations__TokenNotAllowed.selector, address(usdc)));
         swapOperations.createSwapOffer(
             ISwapOperations.SwapOffer({
                 offerToken: address(usdc),
@@ -294,16 +246,12 @@ contract SwapProtocolBaseTest is Test {
         swapOperations.acceptSwapOffer(address(vault));
         vm.stopPrank();
     }
-    
+
     function testRevertsOnTokenReentrancy() external {
         ReentrantERC20 reentrantToken = new ReentrantERC20();
         uint256 mintAmount = 1e18;
         reentrantToken.mint(steven, mintAmount);
-        reentrantToken.configureReentry(
-            address(swapOperations),
-            ISwapOperations.cancelSwapOffer.selector,
-            true
-        );
+        reentrantToken.configureReentry(address(swapOperations), ISwapOperations.cancelSwapOffer.selector, true);
 
         vm.prank(owner);
         swapOperationsOwner.updateAllowedToken(address(reentrantToken), true);
@@ -312,40 +260,27 @@ contract SwapProtocolBaseTest is Test {
         reentrantToken.approve(address(swapOperations), wethOfferAmount);
         vm.expectEmit(false, false, false, true, address(reentrantToken));
         emit ReentrantERC20.ReentrancyAttempt(
-            false,
-            abi.encodeWithSelector(ReentrancyGuard.ReentrancyGuardReentrantCall.selector)
+            false, abi.encodeWithSelector(ReentrancyGuard.ReentrancyGuardReentrantCall.selector)
         );
-        IHoldingVault(swapOperations.createSwapOffer(
-            ISwapOperations.SwapOffer({
-                offerToken: address(reentrantToken),
-                requestToken: address(usdc),
-                offerAmount: mintAmount,
-                requestAmount: usdcRequestAmount
-            })
-        ));
+        IHoldingVault(
+            swapOperations.createSwapOffer(
+                ISwapOperations.SwapOffer({
+                    offerToken: address(reentrantToken),
+                    requestToken: address(usdc),
+                    offerAmount: mintAmount,
+                    requestAmount: usdcRequestAmount
+                })
+            )
+        );
         vm.stopPrank();
     }
 
     function testRevertsWhenAttemptingToReinitializeHoldingVault() external {
-        IHoldingVault vault = _makeSwapOffer(
-            steven,
-            address(weth),
-            address(usdc),
-            wethOfferAmount,
-            usdcRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(steven, address(weth), address(usdc), wethOfferAmount, usdcRequestAmount);
 
         vm.startPrank(address(holdingVaultFactory));
-        vm.expectRevert(abi.encodeWithSelector(
-            IHoldingVault.HoldingVault__AlreadyInitialized.selector
-        ));
-        vault.init(
-            steven,
-            IERC20(address(weth)),
-            IERC20(address(usdc)),
-            wethOfferAmount,
-            usdcRequestAmount
-        );
+        vm.expectRevert(abi.encodeWithSelector(IHoldingVault.HoldingVault__AlreadyInitialized.selector));
+        vault.init(steven, IERC20(address(weth)), IERC20(address(usdc)), wethOfferAmount, usdcRequestAmount);
         vm.stopPrank();
     }
 
@@ -380,13 +315,7 @@ contract SwapProtocolBaseTest is Test {
     }
 
     function testRevertsWhenCreatorOfSwapOfferTriesToAcceptTheirOffer() external {
-        IHoldingVault vault = _makeSwapOffer(
-            nick,
-            address(link),
-            address(dai),
-            linkOfferAmount,
-            daiRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(nick, address(link), address(dai), linkOfferAmount, daiRequestAmount);
         vm.startPrank(nick);
         vm.expectRevert(ISwapOperations.SwapOperations__SwapOfferIsYourOwn.selector);
         swapOperations.acceptSwapOffer(address(vault));
@@ -394,13 +323,7 @@ contract SwapProtocolBaseTest is Test {
     }
 
     function testRevertsWhenAcceptSwapOfferIsCalledWhenTheVaultIsNotActive() external {
-        IHoldingVault vault = _makeSwapOffer(
-            nick,
-            address(link),
-            address(dai),
-            linkOfferAmount,
-            daiRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(nick, address(link), address(dai), linkOfferAmount, daiRequestAmount);
         vm.prank(nick);
         swapOperations.cancelSwapOffer(address(vault));
         vm.startPrank(scott);
@@ -409,13 +332,7 @@ contract SwapProtocolBaseTest is Test {
         swapOperations.acceptSwapOffer(address(vault));
         vm.stopPrank();
 
-        vault = _makeSwapOffer(
-            steven,
-            address(weth),
-            address(dai),
-            wethOfferAmount,
-            daiRequestAmount
-        );
+        vault = _makeSwapOffer(steven, address(weth), address(dai), wethOfferAmount, daiRequestAmount);
         vm.startPrank(scott);
         dai.approve(address(swapOperations), daiRequestAmount);
         swapOperations.acceptSwapOffer(address(vault));
@@ -429,26 +346,14 @@ contract SwapProtocolBaseTest is Test {
     }
 
     function testRevertsWhenCancelSwapOfferIsCalledWhenTheVaultIsNotActive() external {
-        IHoldingVault vault = _makeSwapOffer(
-            nick,
-            address(link),
-            address(dai),
-            linkOfferAmount,
-            daiRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(nick, address(link), address(dai), linkOfferAmount, daiRequestAmount);
         vm.startPrank(nick);
         swapOperations.cancelSwapOffer(address(vault));
         vm.expectRevert(ISwapOperations.SwapOperations__SwapOfferNotActive.selector);
         swapOperations.cancelSwapOffer(address(vault));
         vm.stopPrank();
 
-        vault = _makeSwapOffer(
-            steven,
-            address(weth),
-            address(dai),
-            wethOfferAmount,
-            daiRequestAmount
-        );
+        vault = _makeSwapOffer(steven, address(weth), address(dai), wethOfferAmount, daiRequestAmount);
         vm.startPrank(scott);
         dai.approve(address(swapOperations), daiRequestAmount);
         swapOperations.acceptSwapOffer(address(vault));
@@ -459,98 +364,56 @@ contract SwapProtocolBaseTest is Test {
         vm.stopPrank();
     }
 
-
     /*//////////////////////////////////////////////////////////////
                           HOLDING_VAULT_FACTORY
     //////////////////////////////////////////////////////////////*/
     function testRevertsWhenCreatingSwapThroughFactoryDirectly() external {
         vm.startPrank(scott);
-        vm.expectRevert(abi.encodeWithSelector(
-            Ownable.OwnableUnauthorizedAccount.selector,
-            scott
-        ));
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, scott));
         holdingVaultFactory.createHoldingVaultForSwapOffer(
-            steven,
-            address(weth),
-            address(usdc),
-            wethOfferAmount,
-            usdcRequestAmount
+            steven, address(weth), address(usdc), wethOfferAmount, usdcRequestAmount
         );
         vm.stopPrank();
     }
 
     function testRevertsWhenCancelingSwapThroughFactoryDirectly() external {
-        IHoldingVault vault = _makeSwapOffer(
-            scott,
-            address(dai),
-            address(weth),
-            daiOfferAmount,
-            wethRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(scott, address(dai), address(weth), daiOfferAmount, wethRequestAmount);
         vm.startPrank(scott);
-        vm.expectRevert(abi.encodeWithSelector(
-            Ownable.OwnableUnauthorizedAccount.selector,
-            scott
-        ));
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, scott));
         holdingVaultFactory.setHoldingVaultAsCanceled(address(vault));
         vm.stopPrank();
     }
 
     function testRevertsWhenCompletingSwapThroughFactoryDirectly() external {
-        IHoldingVault vault = _makeSwapOffer(
-            steven,
-            address(weth),
-            address(dai),
-            wethOfferAmount,
-            daiRequestAmount
-        );
+        IHoldingVault vault = _makeSwapOffer(steven, address(weth), address(dai), wethOfferAmount, daiRequestAmount);
         vm.startPrank(michael);
-        vm.expectRevert(abi.encodeWithSelector(
-            Ownable.OwnableUnauthorizedAccount.selector,
-            michael
-        ));
+        vm.expectRevert(abi.encodeWithSelector(Ownable.OwnableUnauthorizedAccount.selector, michael));
         holdingVaultFactory.completeHoldingVaultSwap(address(vault), michael);
         vm.stopPrank();
     }
-
-    
-
 
     /*//////////////////////////////////////////////////////////////
                        HOLDING_VAULT_IMPLEMENTATION
     //////////////////////////////////////////////////////////////*/
     function testImplementationCannotBeInitializedByNonFactory() external {
         vm.startPrank(steven);
-        vm.expectRevert(abi.encodeWithSelector(
-            IHoldingVault.HoldingVault__OnlyFactoryCanExecute.selector,
-            steven
-        ));
+        vm.expectRevert(abi.encodeWithSelector(IHoldingVault.HoldingVault__OnlyFactoryCanExecute.selector, steven));
         holdingVaultImplementation.init(
-            steven,
-            IERC20(address(weth)),
-            IERC20(address(usdc)),
-            wethOfferAmount,
-            usdcRequestAmount
+            steven, IERC20(address(weth)), IERC20(address(usdc)), wethOfferAmount, usdcRequestAmount
         );
         vm.stopPrank();
     }
 
     function testImplementationCannotCompleteSwapByNonFactory() external {
         vm.startPrank(steven);
-        vm.expectRevert(abi.encodeWithSelector(
-            IHoldingVault.HoldingVault__OnlyFactoryCanExecute.selector,
-            steven
-        ));
+        vm.expectRevert(abi.encodeWithSelector(IHoldingVault.HoldingVault__OnlyFactoryCanExecute.selector, steven));
         holdingVaultImplementation.completeSwapOffer(steven);
         vm.stopPrank();
     }
 
     function testImplementationCannotCancelSwapByNonFactory() external {
         vm.startPrank(steven);
-        vm.expectRevert(abi.encodeWithSelector(
-            IHoldingVault.HoldingVault__OnlyFactoryCanExecute.selector,
-            steven
-        ));
+        vm.expectRevert(abi.encodeWithSelector(IHoldingVault.HoldingVault__OnlyFactoryCanExecute.selector, steven));
         holdingVaultImplementation.swapOfferCancelled();
         vm.stopPrank();
     }
@@ -566,13 +429,17 @@ contract SwapProtocolBaseTest is Test {
         holdingVaultImplementation.confirmOfferTokensAreLocked();
     }
 
-
     /*//////////////////////////////////////////////////////////////
                             HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-
-    function _makeSwapOffer(address creator, address offerToken, address requestToken, uint256 offerAmount, uint256 requestAmount ) private returns (IHoldingVault) {
+    function _makeSwapOffer(
+        address creator,
+        address offerToken,
+        address requestToken,
+        uint256 offerAmount,
+        uint256 requestAmount
+    ) private returns (IHoldingVault) {
         vm.startPrank(creator);
         IERC20(offerToken).approve(address(swapOperations), offerAmount);
         address vault = swapOperations.createSwapOffer(
@@ -586,8 +453,4 @@ contract SwapProtocolBaseTest is Test {
         vm.stopPrank();
         return IHoldingVault(vault);
     }
-
-
-
-
 }

@@ -148,11 +148,11 @@ contract SwapOperations is ISwapOperations, ISwapOperationsOwner, Ownable, Reent
     /*//////////////////////////////////////////////////////////////
                             GETTER FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-    function isAllowedToken(address token) external view returns (bool) {
-        return s_allowedTokens[token];
-    }
-
     function getHoldingVaultFactory() external view returns (address) {
         return address(i_holdingVaultFactory);
+    }
+
+    function isAllowedToken(address token) external view returns (bool) {
+        return s_allowedTokens[token];
     }
 }

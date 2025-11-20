@@ -52,7 +52,7 @@ interface IHoldingVault {
 
     /*//////////////////////////////////////////////////////////////
                             GETTER FUNCTIONS
-    //////////////////////////////////////////////////////////////*/ 
+    //////////////////////////////////////////////////////////////*/
     /// @notice This will revert if called before initialization
     function confirmOfferTokensAreLocked() external view returns (bool);
     /// @notice This will return Active before the contract is initialized

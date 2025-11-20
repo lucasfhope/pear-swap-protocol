@@ -45,19 +45,18 @@ interface ISwapOperations {
     event SwapOfferCompleted(address indexed holdingVault, address indexed acceptor);
     event SwapOfferCancelled(address indexed holdingVault);
     event AllowedTokenUpdated(address indexed token, bool isAllowed);
-    
 
     /*//////////////////////////////////////////////////////////////
                             EXTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
-    /** 
+    /**
      * @notice Creates a new swap offer and returns the created vault address
      * @param swapOffer Swap offer details
      * @return Address of the newly created holding vault
      */
     function createSwapOffer(SwapOffer memory swapOffer) external returns (address);
 
-    /** 
+    /**
      * @notice Cancels an active swap offer
      * @param vaultAddress Address of the holding vault representing the swap
      * @notice Callable by ownly the creator of the swap offer

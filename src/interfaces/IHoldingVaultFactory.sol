@@ -22,7 +22,7 @@ interface IHoldingVaultFactory {
         address requestToken,
         uint256 offerAmount,
         uint256 requestAmount
-    ) external returns (address); 
+    ) external returns (address);
 
     /// @notice Calls the vault to complete the swap on behalf of the acceptor
     function completeHoldingVaultSwap(address vaultAddress, address acceptor) external;

@@ -5,7 +5,7 @@ import {Test} from "forge-std/Test.sol";
 import {DeploySwapOperations} from "script/DeploySwapOperations.s.sol";
 import {HelperConfig} from "script/HelperConfig.s.sol";
 
-contract UnconfiguredNetworkTest is Test{
+contract UnconfiguredNetworkTest is Test {
     DeploySwapOperations deployer;
     HelperConfig helperConfig;
 
@@ -19,12 +19,7 @@ contract UnconfiguredNetworkTest is Test{
         deployer.deploySwapOperations(makeAddr("owner"));
 
         helperConfig = new HelperConfig();
-        vm.expectRevert(
-            abi.encodeWithSelector(
-                HelperConfig.HelperConfig__InvalidChainId.selector,
-                block.chainid
-            )
-        );
+        vm.expectRevert(abi.encodeWithSelector(HelperConfig.HelperConfig__InvalidChainId.selector, block.chainid));
         helperConfig.getConfigByChainId(block.chainid);
     }
 }

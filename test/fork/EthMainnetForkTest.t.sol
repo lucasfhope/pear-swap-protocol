@@ -4,7 +4,6 @@ pragma solidity 0.8.24;
 import {SwapProtocolBaseTest} from "test/unit/SwapProtocolBaseTest.t.sol";
 import {ChainIds} from "script/HelperConfig.s.sol";
 
-
 contract SwapProtocolMainnetForkTest is SwapProtocolBaseTest, ChainIds {
     uint256 ethMainnetForkId;
 
