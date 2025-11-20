@@ -7,6 +7,11 @@ remappings = [
     "@solmate/=lib/solmate/src/",
 ]
 
+[invariant]
+runs = 256
+depth = 64
+fail_on_revert = true
+
 [lint]
 exclude_lints = [
     "mixed-case-variable",
